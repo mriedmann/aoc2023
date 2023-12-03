@@ -16,6 +16,7 @@ fn main() {
 
     match level {
         1 => { result_a = Some(level01::LevelSolver::solve_a(&input_file_a.to_string())); result_b = Some(level01::LevelSolver::solve_b(&input_file_b.to_string())); },
+        2 => { result_a = Some(level02::LevelSolver::solve_a(&input_file_a.to_string())); result_b = Some(level02::LevelSolver::solve_b(&input_file_b.to_string())); },
         _ => panic!("level not implemented"),
     };
 
