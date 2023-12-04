@@ -4,12 +4,6 @@ use crate::api::Solver;
 
 pub struct LevelSolver {}
 
-const EMPTY:char = '.';
-
-fn get_grid_index(x:usize, y:usize, grid_width:usize) -> usize {
-    y * grid_width + x
-}
-
 struct Grid {
     data: Vec<char>,
     width: usize,
@@ -52,7 +46,6 @@ fn get_part_numbers(input: &str) -> Vec<(usize, usize, char)> {
     for y in 0..grid.height+1 {
         let mut part_num: String = "".to_owned();
         let mut part_num_start: Option<usize> = None;
-        let mut part_num_end: Option<usize> = None;
         for x in 0..grid.width+1 {
             let c_r = grid.get(x,y);
             if c_r.is_none() { continue; }
@@ -65,7 +58,7 @@ fn get_part_numbers(input: &str) -> Vec<(usize, usize, char)> {
                 part_num.push(c.clone())
             } else {
                 if !part_num.is_empty() {
-                    part_num_end =  Option::from(grid.index(x,y));
+                    let part_num_end =  Option::from(grid.index(x,y));
                     print!("{} {:?}: ", part_num, grid.coord(part_num_start.unwrap()));
 
                     'outer: for i in part_num_start.unwrap()..part_num_end.unwrap() {
