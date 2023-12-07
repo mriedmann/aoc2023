@@ -19,6 +19,7 @@ fn main() {
         2 => { result_a = Some(level02::LevelSolver::solve_a(&input_file_a.to_string())); result_b = Some(level02::LevelSolver::solve_b(&input_file_b.to_string())); },
         3 => { result_a = Some(level03::LevelSolver::solve_a(&input_file_a.to_string())); result_b = Some(level03::LevelSolver::solve_b(&input_file_b.to_string())); },
         4 => { result_a = Some(level04::LevelSolver::solve_a(&input_file_a.to_string())); result_b = Some(level04::LevelSolver::solve_b(&input_file_b.to_string())); },
+        5 => { result_a = Some(level05::LevelSolver::solve_a(&input_file_a.to_string())); result_b = Some(level05::LevelSolver::solve_b(&input_file_b.to_string())); },
         _ => panic!("level not implemented"),
     };
 
