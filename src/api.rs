@@ -1,4 +1,5 @@
 use std::fs;
+use anyhow::Error;
 
 pub struct TextInputFile {
     filename: String
@@ -17,7 +18,7 @@ impl TextInputFile {
     }
 }
 
-pub trait Solver {
-    fn solve_a(input: &str) -> u32;
-    fn solve_b(input: &str) -> u32;
+pub trait Solver<A = u32> {
+    fn solve_a(input: &str) -> Result<A, Error>;
+    fn solve_b(input: &str) -> Result<A, Error>;
 }

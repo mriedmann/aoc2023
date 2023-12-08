@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use anyhow::Error;
 use crate::api::Solver;
 
 pub struct LevelSolver {}
@@ -95,16 +96,16 @@ fn get_part_numbers(input: &str) -> Vec<(usize, usize, char)> {
 }
 
 impl Solver for LevelSolver {
-    fn solve_a(input: &str) -> u32 {
+    fn solve_a(input: &str) -> Result<u32,Error>  {
         let part_numbers = get_part_numbers(input);
         for part_number in part_numbers.clone() {
             //println!("{:?} {:?} {:?}", part_number.0, part_number.1, part_number.2);
             println!("{:?}", part_number.0);
         }
-        part_numbers.iter().map(|x| x.0 as u32).sum()
+        Ok(part_numbers.iter().map(|x| x.0 as u32).sum())
     }
 
-    fn solve_b(input: &str) -> u32 {
+    fn solve_b(input: &str) -> Result<u32,Error>  {
         let part_numbers = get_part_numbers(input);
 
         let mut gears: HashMap<usize, Vec<&(usize,usize,char)>> = HashMap::new();
@@ -119,11 +120,11 @@ impl Solver for LevelSolver {
             //println!("{:?} {:?} {:?}", part_number.0, part_number.1, part_number.2);
             println!("{:?}", gear);
         }
-        gears
+        Ok(gears
             .values()
             .filter(|x| x.len() > 1)
             .map(|x| x[0].0 as u32 * x[1].0 as u32)
-            .sum()
+            .sum())
     }
 }
 
@@ -148,18 +149,20 @@ mod tests {
     }
 
     #[test]
-    fn test_a() {
+    fn test_a() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_a(input);
+        let solution = LevelSolver::solve_a(input)?;
 
         assert_eq!(solution, 4361);
+        Ok(())
     }
 
     #[test]
-    fn test_b() {
+    fn test_b() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_b(input);
+        let solution = LevelSolver::solve_b(input)?;
 
         assert_eq!(solution, 467835);
+        Ok(())
     }
 }

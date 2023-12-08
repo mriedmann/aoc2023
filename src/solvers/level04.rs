@@ -1,5 +1,6 @@
 use std::cell::Cell;
 use std::collections::HashMap;
+use anyhow::Error;
 use itertools::Itertools;
 use crate::api::Solver;
 
@@ -32,15 +33,15 @@ struct Card {
 }
 
 impl Solver for LevelSolver {
-    fn solve_a(input: &str) -> u32 {
-        parse_cards(input)
+    fn solve_a(input: &str) -> Result<u32,Error>  {
+        Ok(parse_cards(input)
             .iter()
             .inspect(|c| println!("{:?}", c))
             .map(|c| if c.winning_numbers > 0 {2u32.pow((c.winning_numbers-1) as u32)} else { 0 })
-            .sum()
+            .sum())
     }
 
-    fn solve_b(input: &str) -> u32 {
+    fn solve_b(input: &str) -> Result<u32,Error>  {
         let cards = parse_cards(input);
         let cards_map = cards
             .iter()
@@ -60,7 +61,7 @@ impl Solver for LevelSolver {
                 }
             }
         }
-        cards_map.values().map(|c| c.quantity.get() as u32).sum()
+        Ok(cards_map.values().map(|c| c.quantity.get() as u32).sum())
     }
 }
 
@@ -81,18 +82,20 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
     }
 
     #[test]
-    fn test_a() {
+    fn test_a() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_a(input);
+        let solution = LevelSolver::solve_a(input)?;
 
         assert_eq!(solution, 13);
+        Ok(())
     }
 
     #[test]
-    fn test_b() {
+    fn test_b() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_b(input);
+        let solution = LevelSolver::solve_b(input)?;
 
         assert_eq!(solution, 30);
+        Ok(())
     }
 }

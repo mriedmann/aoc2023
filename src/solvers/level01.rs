@@ -1,3 +1,5 @@
+use anyhow::{Context, Error};
+use itertools::Itertools;
 use crate::api::Solver;
 use regex::Regex;
 use once_cell::sync::Lazy;
@@ -17,43 +19,45 @@ fn match_number(haystack: &str) -> impl Iterator<Item = &str> {
 }
 
 impl Solver for LevelSolver {
-    fn solve_a(input: &str) -> u32 {
-        input
+    fn solve_a(input: &str) -> Result<u32,Error> {
+        let x = input
             .lines()
             .inspect(|x| println!("1 {:?}", x))
             .map(|line| line.chars().filter_map(|x| x.to_digit(10)).collect::<Vec<u32>>())
             .inspect(|x| println!("2 {:?}", x))
             .map(|nums| 10 * nums.first().unwrap() + nums.last().unwrap())
             .inspect(|x| println!("3 {:?}", x))
-            .sum::<u32>()
+            .sum::<u32>();
+        Ok(x)
     }
 
-    fn solve_b(input: &str) -> u32 {
-        input
+    fn solve_b(input: &str) -> Result<u32,Error> {
+        Ok(input
             .lines()
             .inspect(|x| println!("1 {:?}", x))
             .map(|line| {
                 match_number(&line)
                     .map(|digit| {
                         match digit {
-                            "one" => 1,
-                            "two" => 2,
-                            "three" => 3,
-                            "four" => 4,
-                            "five" => 5,
-                            "six" => 6,
-                            "seven" => 7,
-                            "eight" => 8,
-                            "nine" => 9,
-                            s => s.chars().next().unwrap().to_digit(10).unwrap()
+                            "one" => Ok(1),
+                            "two" => Ok(2),
+                            "three" => Ok(3),
+                            "four" => Ok(4),
+                            "five" => Ok(5),
+                            "six" => Ok(6),
+                            "seven" => Ok(7),
+                            "eight" => Ok(8),
+                            "nine" => Ok(9),
+                            s => s.chars().next().context("no char")?.to_digit(10).context("no digit")
                         }
                     })
-                    .collect::<Vec<u32>>()
+                    .map(|x| x.unwrap())
+                    .collect_vec()
             })
             .inspect(|x| println!("2 {:?}", x))
             .map(|nums| 10 * nums.first().unwrap() + nums.last().unwrap())
             .inspect(|x| println!("3 {:?}", x))
-            .sum::<u32>()
+            .sum())
     }
 }
 
@@ -85,26 +89,29 @@ mod tests {
     }
 
     #[test]
-    fn test_a() {
+    fn test_a() -> Result<(),Error> {
         let input = input_a();
-        let solution = LevelSolver::solve_a(input);
+        let solution = LevelSolver::solve_a(input)?;
 
         assert_eq!(solution, 142); // 12, 38, 15, 77
+        Ok(())
     }
 
     #[test]
-    fn test_b() {
+    fn test_b() -> Result<(),Error> {
         let input = input_b();
-        let solution = LevelSolver::solve_b(input); 
+        let solution = LevelSolver::solve_b(input)?;
 
         assert_eq!(solution, 281); // 29, 83, 13, 24, 42, 14, 76
+        Ok(())
     }
 
     #[test]
-    fn edge_case_1() {
+    fn edge_case_1() -> Result<(),Error> {
         let input ="bcmqn9onecnrzhsrsgzggzhtskjeightbz6khfhccktwonenrj";
-        let solution = LevelSolver::solve_b(input); 
+        let solution = LevelSolver::solve_b(input)?;
 
         assert_eq!(solution, 91);
+        Ok(())
     }
 }

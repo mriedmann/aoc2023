@@ -1,5 +1,4 @@
-use std::cell::Cell;
-use std::collections::HashMap;
+use anyhow::{Context, Error};
 use itertools::Itertools;
 use crate::api::Solver;
 
@@ -45,13 +44,11 @@ fn parse_maps(input: &str) -> Vec<Vec<(u64, u64, u64)>> {
                 .sorted_by(|a, b| Ord::cmp(&a.1, &b.1))
                 .collect_vec()
         })
-        .inspect(|x| {
-            //println!("2: {:?}", x)
-        })
+        //.inspect(|x| println!("2: {:?}", x))
         .collect_vec()
 }
 
-fn solve(seeds: Vec<u64>, maps: Vec<Vec<(u64, u64, u64)>>) -> u32 {
+fn solve(seeds: Vec<u64>, maps: Vec<Vec<(u64, u64, u64)>>) -> Result<u32,Error> {
     seeds
         .iter()
         .map(|seed| {
@@ -77,28 +74,22 @@ fn solve(seeds: Vec<u64>, maps: Vec<Vec<(u64, u64, u64)>>) -> u32 {
         .inspect(|x| {
             println!("5: {:?}", x)
         })
-        .min()
-        .unwrap().try_into().unwrap()
-}
-
-#[derive(Debug)]
-struct Card {
-    id: usize,
-    winning_numbers: usize,
-    quantity: Cell<usize>
+        .min().context("no min")?
+        .try_into().context("try failed")
 }
 
 impl Solver for LevelSolver {
-    fn solve_a(input: &str) -> u32 {
+    fn solve_a(input: &str) -> Result<u32,Error>  {
         let seeds = parse_seeds(input);
         let maps = parse_maps(input);
         solve(seeds, maps)
     }
 
-    fn solve_b(input: &str) -> u32 {
+    fn solve_b(_input: &str) -> Result<u32,Error>  {
         // NOT BRUTEFORCABLE
-        return 0;
+        return Ok(0);
 
+        /*
         let raw_seeds = parse_seeds(input);
         let seeds = raw_seeds
             .chunks_exact(2)
@@ -113,6 +104,7 @@ impl Solver for LevelSolver {
         //println!("{:?}", seeds);
         let maps = parse_maps(input);
         solve(seeds, maps)
+         */
     }
 }
 
@@ -160,18 +152,20 @@ humidity-to-location map:
     }
 
     #[test]
-    fn test_a() {
+    fn test_a() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_a(input);
+        let solution = LevelSolver::solve_a(input)?;
 
         assert_eq!(solution, 35);
+        Ok(())
     }
 
     #[test]
-    fn test_b() {
+    fn test_b() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_b(input);
+        let solution = LevelSolver::solve_b(input)?;
 
         assert_eq!(solution, 46);
+        Ok(())
     }
 }

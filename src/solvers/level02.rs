@@ -1,4 +1,5 @@
 use std::cmp;
+use anyhow::Error;
 use itertools::Itertools;
 use crate::api::Solver;
 
@@ -44,25 +45,25 @@ fn parse_line(line: &str) -> (u32, Vec<(u8, u8, u8)>) {
 }
 
 impl Solver for LevelSolver {
-    fn solve_a(input: &str) -> u32 {
+    fn solve_a(input: &str) -> Result<u32,Error>  {
         let max_rgb = (12,13,14);
-        input.lines()
+        Ok(input.lines()
             .map(|line| parse_line(line))
             .inspect(|x| println!("1 {:?} {:?}", x.0, x.1))
             .filter(| x| x.1.iter().all(|c| c.0 <= max_rgb.0 && c.1 <= max_rgb.1 && c.2 <= max_rgb.2))
             .inspect(|x| println!("2 {:?} {:?}", x.0, x.1))
             .map(|x| x.0)
-            .sum()
+            .sum())
     }
 
-    fn solve_b(input: &str) -> u32 {
-        input.lines()
+    fn solve_b(input: &str) -> Result<u32,Error>  {
+        Ok(input.lines()
             .map(|line| parse_line(line))
             .inspect(|x| println!("1 {:?} {:?}", x.0, x.1))
             .map(|x| x.1.iter().copied().max_rgb().unwrap())
             .inspect(|x| println!("2 {:?} {:?}", x.0, x.1))
             .map(|x| x.0 as u32 * x.1 as u32 * x.2 as u32)
-            .sum()
+            .sum())
     }
 }
 
@@ -88,7 +89,7 @@ mod tests {
     }
 
     #[test]
-    fn test_a_2(){
+    fn test_a_2()  -> Result<(),Error> {
         let x = vec![
             (1, vec![(4, 0, 3), (1, 2, 6), (0, 2, 0)]),
             (2, vec![(0, 2, 1), (1, 3, 4), (0, 1, 1)]),
@@ -99,22 +100,25 @@ mod tests {
             .map(|x| x.1.to_vec())
             .flatten()
             .max_rgb();
-        assert_eq!(x.unwrap(), (20,13,15))
+        assert_eq!(x.unwrap(), (20,13,15));
+        Ok(())
     }
 
     #[test]
-    fn test_a() {
+    fn test_a() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_a(input);
+        let solution = LevelSolver::solve_a(input)?;
 
         assert_eq!(solution, 8);
+        Ok(())
     }
 
     #[test]
-    fn test_b() {
+    fn test_b() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_b(input); 
+        let solution = LevelSolver::solve_b(input)?;
 
         assert_eq!(solution, 2286);
+        Ok(())
     }
 }
