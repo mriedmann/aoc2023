@@ -1,10 +1,10 @@
-use std::cmp::Ordering;
-use std::collections::HashMap;
-use anyhow::{Context, Error};
+use anyhow::Error;
 use itertools::Itertools;
 use crate::api::Solver;
 
-pub struct LevelSolver {}
+pub struct LevelSolver {
+    pub parsed_input: Vec<Vec<i32>>,
+}
 
 fn gen_diff(vec: &Vec<i32>) -> Vec<i32> {
     vec.iter()
@@ -30,7 +30,7 @@ fn gen_next(diffs: &Vec<&i32>) -> i32 {
     diffs.iter().copied().sum()
 }
 
-fn solve(parsed_input: Vec<Vec<i32>>) ->  Result<i32,Error> {
+fn solve(parsed_input: &Vec<Vec<i32>>) ->  Result<i32,Error> {
     Ok(parsed_input.iter().map(|line| {
         let diffs = gen_diffs(line);
         let last_diffs = diffs.iter().map(|d| d.last().unwrap()).collect_vec();
@@ -39,20 +39,25 @@ fn solve(parsed_input: Vec<Vec<i32>>) ->  Result<i32,Error> {
         n
     }).sum())
 }
-impl Solver<i32> for LevelSolver {
-    fn solve_a(input: &str) -> Result<i32,Error> {
-        let parsed_input = parse(input)?;
-        solve(parsed_input)
+impl Solver for LevelSolver {
+    fn new(input: String) -> Self {
+       LevelSolver {
+           parsed_input: parse(input).unwrap()
+       }
     }
 
-    fn solve_b(input: &str) -> Result<i32,Error> {
+    fn solve_a(&self) -> Result<String,Error> {
+        Ok(solve(&self.parsed_input).unwrap().to_string())
+    }
+
+    fn solve_b(&self) -> Result<String,Error> {
         //let parsed_input = parse(input)?;
         //solve(parsed_input)
-        Ok(0)
+        Ok(String::new())
     }
 }
 
-fn parse(input: &str) -> Result<Vec<Vec<i32>>, Error> {
+fn parse(input: String) -> Result<Vec<Vec<i32>>, Error> {
     Ok(input
         .lines()
         .map(|line| line.split_whitespace().collect_vec())
@@ -74,9 +79,16 @@ mod tests {
         ".trim()
     }
 
+    fn parsed_input() -> Vec<Vec<i32>> {
+        vec![
+            vec![ 0,  3,  6,  9, 12, 15],
+            vec![ 1,  3,  6, 10, 15, 21],
+            vec![10, 13, 16, 21, 30, 45],
+        ]
+    }
+
     #[test]
     fn test_gen_diff() -> Result<(),Error> {
-        let input = input();
         let solution = gen_diff(&vec![0, 3, 6, 9, 12, 15]);
 
         assert_eq!(solution, vec![3, 3, 3, 3, 3]);
@@ -85,7 +97,6 @@ mod tests {
 
     #[test]
     fn test_gen_diffs() -> Result<(),Error> {
-        let input = input();
         let solution = gen_diffs(&vec![0, 3, 6, 9, 12, 15]);
 
         assert_eq!(solution, vec![
@@ -98,7 +109,6 @@ mod tests {
 
     #[test]
     fn test_gen_next() -> Result<(),Error> {
-        let input = input();
         let solution = gen_next(&vec![&0,&3,&15]);
 
         assert_eq!(solution, 18);
@@ -108,31 +118,27 @@ mod tests {
     #[test]
     fn test_parse() -> Result<(),Error> {
         let input = input();
-        let solution = parse(input)?;
+        let solution = parse(input.to_string())?;
 
-        assert_eq!(solution, vec![
-            vec![ 0,  3,  6,  9, 12, 15],
-            vec![ 1,  3,  6, 10, 15, 21],
-            vec![10, 13, 16, 21, 30, 45],
-        ]);
+        assert_eq!(solution, parsed_input());
         Ok(())
     }
 
     #[test]
     fn test_a() -> Result<(),Error> {
-        let input = input();
-        let solution = LevelSolver::solve_a(input)?;
+        let parsed_input = parsed_input();
+        let solution = LevelSolver { parsed_input }.solve_a()?;
 
-        assert_eq!(solution, 114);
+        assert_eq!(solution, 114.to_string());
         Ok(())
     }
 
     #[test]
     fn test_b() -> Result<(),Error> {
-        let input = input();
-        let solution = LevelSolver::solve_b(input)?;
+        let parsed_input = parsed_input();
+        let solution = LevelSolver { parsed_input }.solve_b()?;
 
-        assert_eq!(solution, 0);
+        assert_eq!(solution, String::new());
         Ok(())
     }
 }
