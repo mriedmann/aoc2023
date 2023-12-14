@@ -25,6 +25,7 @@ fn main() -> Result<(),Error> {
         6 => { dispatch(level06::LevelSolver::new(input))},
         7 => { dispatch(level07::LevelSolver::new(input))},
         8 => { dispatch(level08::LevelSolver::new(input))},
+        9 => { dispatch(level09::LevelSolver::new(input))},
         _ => panic!("level not implemented"),
     };
 
