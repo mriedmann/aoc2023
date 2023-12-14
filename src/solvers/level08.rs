@@ -60,6 +60,36 @@ impl Debug for TreeNode {
 
 type TreeNodeRef = Rc<RefCell<TreeNode>>;
 
+fn traverse_tree(instructions: &str, start_node: TreeNodeRef, mut stop_f: impl FnMut(&TreeNodeRef) -> bool) -> usize {
+    let mut instuction_pointer = 0;
+    let mut stack = vec![start_node];
+
+    while !stack.is_empty() {
+        let current: Rc<RefCell<TreeNode>> = stack.pop().unwrap();
+        println!("{:?}", current);
+
+        if stop_f(&current) {
+            break;
+        }
+
+        let inst = instructions.as_bytes()[instuction_pointer % instructions.len()] as char;
+        instuction_pointer += 1;
+        if inst.eq(&'L') {
+            if let Some(left) = &current.borrow().left {
+                stack.push(left.to_owned());
+            };
+        } else if inst.eq(&'R') {
+            if let Some(right) = &current.borrow().right {
+                stack.push(right.to_owned());
+            };
+        } else {
+            panic!("invalid instruction");
+        }
+    }
+
+    instuction_pointer
+}
+
 impl Solver for LevelSolver {
     fn new(input: String) -> Self {
         let (instructions, nodes_input) = parse(&input).unwrap();
@@ -84,43 +114,22 @@ impl Solver for LevelSolver {
     }
 
     fn solve_a(&self) -> Result<String,Error> {
-        let mut instuction_pointer = 0;
         let node_map = &self.node_map;
 
         let start_node = node_map.get("AAA").unwrap().to_owned();
         let stop_node = node_map.get("ZZZ").unwrap().to_owned();
 
-        let mut stack = vec![start_node];
-
-        while !stack.is_empty() {
-            let current: Rc<RefCell<TreeNode>> = stack.pop().unwrap();
-            println!("{:?}", current);
-
-            if current.borrow().name == stop_node.borrow().name {
-                break;
-            }
-
-            let inst = self.instructions.as_bytes()[instuction_pointer % self.instructions.len()] as char;
-            instuction_pointer += 1;
-            if inst.eq(&'L') {
-                if let Some(left) = &current.borrow().left {
-                    stack.push(left.to_owned());
-                };
-            } else if inst.eq(&'R') {
-                if let Some(right) = &current.borrow().right {
-                    stack.push(right.to_owned());
-                };
-            } else {
-                panic!("invalid instruction");
-            }
-        }
+        let instuction_pointer = traverse_tree(
+            self.instructions.as_str(),
+            start_node,
+            |current| current.borrow().name == stop_node.borrow().name
+        );
 
         Ok(instuction_pointer.to_string())
     }
 
     fn solve_b(&self) -> Result<String,Error> {
         let node_map = &self.node_map;
-        let mut instuction_pointer = 0;
 
         let ps: Vec<(RefCell<usize>, TreeNodeRef)> = node_map
             .values()
@@ -130,44 +139,31 @@ impl Solver for LevelSolver {
 
         for (_, (n,p)) in ps.iter().enumerate() {
             println!("## {:?}", p);
-            let mut z_node_name: Cell<String> = Cell::new(String::from(""));
+            let mut z_node_name: Cell<String> = Cell::new(String::new());
             let mut z_count = 0;
             let mut z_step_count = 0;
 
-            let mut stack = vec![p.clone()];
+            traverse_tree(
+                self.instructions.as_str(),
+                p.clone(),
+                |current| {
+                    if z_count > 1 && &current.borrow().name == z_node_name.get_mut() {
+                        return true
+                    }
 
-            while !stack.is_empty() {
-                let current: Rc<RefCell<TreeNode>> = stack.pop().unwrap();
-                println!("{:?}", current);
+                    if current.borrow().name.ends_with("Z") {
+                        z_node_name.set(current.borrow().name.to_string());
+                        z_count += 1;
+                        if z_count > 1 { return true }
+                        z_step_count = 0;
+                    }
 
-                if z_count > 1 && &current.borrow().name == z_node_name.get_mut() {
-                    break;
+                    z_step_count += 1;
+                    false
                 }
+            );
 
-                if current.borrow().name.ends_with("Z") {
-                    z_node_name.set(current.borrow().name.to_string());
-                    z_count += 1;
-                    if z_count > 1 { break }
-                    z_step_count = 0;
-                }
-
-                let inst = self.instructions.as_bytes()[instuction_pointer % self.instructions.len()] as char;
-                instuction_pointer += 1;
-                z_step_count += 1;
-                if inst.eq(&'L') {
-                    if let Some(left) = &current.borrow().left {
-                        stack.push(left.to_owned());
-                    };
-                } else if inst.eq(&'R') {
-                    if let Some(right) = &current.borrow().right {
-                        stack.push(right.to_owned());
-                    };
-                } else {
-                    panic!("invalid instruction");
-                }
-            }
             n.replace(z_step_count);
-            instuction_pointer = 0;
         }
         for (i, (n,p)) in ps.iter().enumerate() {
             println!("{}: {} | {:?}", i, n.borrow(), p.borrow());
