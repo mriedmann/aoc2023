@@ -4,7 +4,9 @@ use anyhow::Error;
 use itertools::Itertools;
 use crate::api::Solver;
 
-pub struct LevelSolver {}
+pub struct LevelSolver {
+    input: String,
+}
 
 fn parse_cards(input: &str) -> Vec<Card> {
     input.lines()
@@ -33,16 +35,23 @@ struct Card {
 }
 
 impl Solver for LevelSolver {
-    fn solve_a(input: &str) -> Result<u32,Error>  {
-        Ok(parse_cards(input)
+    fn new(input: String) -> Self {
+        LevelSolver {
+            input: input.to_string()
+        }
+    }
+
+    fn solve_a(&self) -> Result<String,Error>  {
+        Ok(parse_cards(&self.input)
             .iter()
             .inspect(|c| println!("{:?}", c))
             .map(|c| if c.winning_numbers > 0 {2u32.pow((c.winning_numbers-1) as u32)} else { 0 })
-            .sum())
+            .sum::<u32>()
+            .to_string())
     }
 
-    fn solve_b(input: &str) -> Result<u32,Error>  {
-        let cards = parse_cards(input);
+    fn solve_b(&self) -> Result<String,Error>  {
+        let cards = parse_cards(&self.input);
         let cards_map = cards
             .iter()
             .map(|c| (c.id.clone(), c))
@@ -61,7 +70,7 @@ impl Solver for LevelSolver {
                 }
             }
         }
-        Ok(cards_map.values().map(|c| c.quantity.get() as u32).sum())
+        Ok(cards_map.values().map(|c| c.quantity.get() as u32).sum::<u32>().to_string())
     }
 }
 
@@ -70,7 +79,7 @@ mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
-    fn input() -> &'static str {
+    fn input() -> String {
         "
 Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
 Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19
@@ -78,24 +87,24 @@ Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1
 Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
 Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
 Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
-        ".trim()
+        ".trim().to_string()
     }
 
     #[test]
     fn test_a() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_a(input)?;
+        let solution = LevelSolver::new(input).solve_a()?;
 
-        assert_eq!(solution, 13);
+        assert_eq!(solution, 13.to_string());
         Ok(())
     }
 
     #[test]
     fn test_b() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_b(input)?;
+        let solution = LevelSolver::new(input).solve_b()?;
 
-        assert_eq!(solution, 30);
+        assert_eq!(solution, 30.to_string());
         Ok(())
     }
 }

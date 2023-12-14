@@ -1,10 +1,12 @@
 use anyhow::{Context, Error};
 use itertools::Itertools;
-use crate::api::Solver;
+use crate::api::{Solver};
 use regex::Regex;
 use once_cell::sync::Lazy;
 
-pub struct LevelSolver {}
+pub struct LevelSolver {
+    input: String,
+}
 
 fn match_number(haystack: &str) -> impl Iterator<Item = &str> {
     // had to do this weird hack to avoid edgecased with things like "twone" - yes there are better options ;)
@@ -19,8 +21,15 @@ fn match_number(haystack: &str) -> impl Iterator<Item = &str> {
 }
 
 impl Solver for LevelSolver {
-    fn solve_a(input: &str) -> Result<u32,Error> {
-        let x = input
+
+    fn new(input: String) -> Self {
+        LevelSolver {
+            input
+        }
+    }
+
+    fn solve_a(&self) -> Result<String,Error> {
+        let x = self.input
             .lines()
             .inspect(|x| println!("1 {:?}", x))
             .map(|line| line.chars().filter_map(|x| x.to_digit(10)).collect::<Vec<u32>>())
@@ -28,11 +37,11 @@ impl Solver for LevelSolver {
             .map(|nums| 10 * nums.first().unwrap() + nums.last().unwrap())
             .inspect(|x| println!("3 {:?}", x))
             .sum::<u32>();
-        Ok(x)
+        Ok(x.to_string())
     }
 
-    fn solve_b(input: &str) -> Result<u32,Error> {
-        Ok(input
+    fn solve_b(&self) -> Result<String,Error> {
+        Ok(self.input
             .lines()
             .inspect(|x| println!("1 {:?}", x))
             .map(|line| {
@@ -57,7 +66,8 @@ impl Solver for LevelSolver {
             .inspect(|x| println!("2 {:?}", x))
             .map(|nums| 10 * nums.first().unwrap() + nums.last().unwrap())
             .inspect(|x| println!("3 {:?}", x))
-            .sum())
+            .sum::<u32>()
+            .to_string())
     }
 }
 
@@ -66,17 +76,17 @@ mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
-    fn input_a() -> &'static str {
+    fn input_a() -> String {
         "
         1abc2
         pqr3stu8vwx
         a1b2c3d4e5f
         treb7uchet
-        ".trim()
+        ".trim().to_string()
     }
     
-    fn input_b() -> &'static str {
-        let s = "
+    fn input_b() -> String {
+        "
         two1nine
         eightwothree
         abcone2threexyz
@@ -84,34 +94,33 @@ mod tests {
         4nineeightseven2
         zoneight234
         7pqrstsixteen
-        ".trim();
-        &s
+        ".trim().to_string()
     }
 
     #[test]
     fn test_a() -> Result<(),Error> {
         let input = input_a();
-        let solution = LevelSolver::solve_a(input)?;
+        let solution = LevelSolver::new(input).solve_a()?;
 
-        assert_eq!(solution, 142); // 12, 38, 15, 77
+        assert_eq!(solution, 142.to_string()); // 12, 38, 15, 77
         Ok(())
     }
 
     #[test]
     fn test_b() -> Result<(),Error> {
         let input = input_b();
-        let solution = LevelSolver::solve_b(input)?;
+        let solution = LevelSolver::new(input).solve_b()?;
 
-        assert_eq!(solution, 281); // 29, 83, 13, 24, 42, 14, 76
+        assert_eq!(solution, 281.to_string()); // 29, 83, 13, 24, 42, 14, 76
         Ok(())
     }
 
     #[test]
     fn edge_case_1() -> Result<(),Error> {
-        let input ="bcmqn9onecnrzhsrsgzggzhtskjeightbz6khfhccktwonenrj";
-        let solution = LevelSolver::solve_b(input)?;
+        let input ="bcmqn9onecnrzhsrsgzggzhtskjeightbz6khfhccktwonenrj".to_string();
+        let solution = LevelSolver::new(input).solve_b()?;
 
-        assert_eq!(solution, 91);
+        assert_eq!(solution, 91.to_string());
         Ok(())
     }
 }

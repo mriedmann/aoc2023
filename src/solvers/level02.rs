@@ -3,7 +3,9 @@ use anyhow::Error;
 use itertools::Itertools;
 use crate::api::Solver;
 
-pub struct LevelSolver {}
+pub struct LevelSolver {
+    input: String,
+}
 
 //12 red cubes, 13 green cubes, and 14 blue cubes
 
@@ -45,25 +47,33 @@ fn parse_line(line: &str) -> (u32, Vec<(u8, u8, u8)>) {
 }
 
 impl Solver for LevelSolver {
-    fn solve_a(input: &str) -> Result<u32,Error>  {
+    fn new(input: String) -> Self {
+        LevelSolver {
+            input: input.to_string()
+        }
+    }
+
+    fn solve_a(&self) -> Result<String,Error>  {
         let max_rgb = (12,13,14);
-        Ok(input.lines()
+        Ok(self.input.lines()
             .map(|line| parse_line(line))
             .inspect(|x| println!("1 {:?} {:?}", x.0, x.1))
             .filter(| x| x.1.iter().all(|c| c.0 <= max_rgb.0 && c.1 <= max_rgb.1 && c.2 <= max_rgb.2))
             .inspect(|x| println!("2 {:?} {:?}", x.0, x.1))
             .map(|x| x.0)
-            .sum())
+            .sum::<u32>()
+            .to_string())
     }
 
-    fn solve_b(input: &str) -> Result<u32,Error>  {
-        Ok(input.lines()
+    fn solve_b(&self) -> Result<String,Error>  {
+        Ok(self.input.lines()
             .map(|line| parse_line(line))
             .inspect(|x| println!("1 {:?} {:?}", x.0, x.1))
             .map(|x| x.1.iter().copied().max_rgb().unwrap())
             .inspect(|x| println!("2 {:?} {:?}", x.0, x.1))
             .map(|x| x.0 as u32 * x.1 as u32 * x.2 as u32)
-            .sum())
+            .sum::<u32>()
+            .to_string())
     }
 }
 
@@ -72,14 +82,14 @@ mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
-    fn input() -> &'static str {
+    fn input() -> String {
         "
         Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
         Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
         Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
         Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
         Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
-        ".trim()
+        ".trim().to_string()
     }
 
     #[test]
@@ -107,18 +117,18 @@ mod tests {
     #[test]
     fn test_a() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_a(input)?;
+        let solution = LevelSolver::new(input).solve_a()?;
 
-        assert_eq!(solution, 8);
+        assert_eq!(solution, 8.to_string());
         Ok(())
     }
 
     #[test]
     fn test_b() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_b(input)?;
+        let solution = LevelSolver::new(input).solve_b()?;
 
-        assert_eq!(solution, 2286);
+        assert_eq!(solution, 2286.to_string());
         Ok(())
     }
 }

@@ -1,10 +1,12 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use anyhow::{Context, Error};
+use anyhow::Error;
 use itertools::Itertools;
 use crate::api::Solver;
 
-pub struct LevelSolver {}
+pub struct LevelSolver {
+    input: String,
+}
 
 #[derive(Debug)]
 #[derive(PartialEq)]
@@ -41,6 +43,7 @@ impl Hand<'_> {
         if with_joker {
             if let Some(j) = cards_map.get(&'J') {
                 joker_count = *j;
+                if joker_count >= 5 { return HandType::FiveOfAKind }
                 cards_map.remove(&'J');
             }
         }
@@ -83,7 +86,7 @@ fn get_card_score(card: &char, with_joker: bool) -> usize {
     }
 }
 
-fn solve(hands: Vec<Hand>, with_joker: bool) -> Result<u32, Error> {
+fn solve(hands: Vec<Hand>, with_joker: bool) -> Result<String, Error> {
     Ok(hands
         .iter()
         .map(|h| (h.get_hand_type(with_joker), h))
@@ -106,17 +109,23 @@ fn solve(hands: Vec<Hand>, with_joker: bool) -> Result<u32, Error> {
             println!("{:?} {:?} {:?} {}", h, t, i, x);
             x
         })
-        .sum::<u32>())
+        .sum::<u32>().to_string())
 }
 
 impl Solver for LevelSolver {
-    fn solve_a(input: &str) -> Result<u32,Error> {
-        let hands = parse(input)?;
+    fn new(input: String) -> Self {
+        LevelSolver {
+            input: input.to_string()
+        }
+    }
+
+    fn solve_a(&self) -> Result<String,Error> {
+        let hands = parse(&self.input)?;
         solve(hands, false)
     }
 
-    fn solve_b(input: &str) -> Result<u32,Error> {
-        let hands = parse(input)?;
+    fn solve_b(&self) -> Result<String,Error> {
+        let hands = parse(&self.input)?;
         solve(hands, true)
     }
 }
@@ -138,20 +147,20 @@ mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
-    fn input() -> &'static str {
+    fn input() -> String {
         "
 32T3K 765
 T55J5 684
 KK677 28
 KTJJT 220
 QQQJA 483
-        ".trim()
+        ".trim().to_string()
     }
 
     #[test]
     fn test_parse() -> Result<(),Error> {
         let input = input();
-        let solution = parse(input)?;
+        let solution = parse(&input)?;
 
         assert_eq!(solution, vec![
             Hand{cards: "32T3K", bid: 765},
@@ -188,7 +197,7 @@ QQQJA 483
         let hands = vec![
             (Hand { cards: "KJJ43", bid: 0 }, ThreeOfAKind),
             (Hand { cards: "JJKAT", bid: 0 }, ThreeOfAKind),
-
+            (Hand { cards: "JJJJJ", bid: 0 }, FiveOfAKind),
         ];
         let solutions = hands.iter().map(|(x,y)| (x.get_hand_type(true), y));
 
@@ -201,18 +210,18 @@ QQQJA 483
     #[test]
     fn test_a() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_a(input)?;
+        let solution = LevelSolver::new(input).solve_a()?;
 
-        assert_eq!(solution, 6440);
+        assert_eq!(solution, 6440.to_string());
         Ok(())
     }
 
     #[test]
     fn test_b() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_b(input)?;
+        let solution = LevelSolver::new(input).solve_b()?;
 
-        assert_eq!(solution, 5905);
+        assert_eq!(solution, 5905.to_string());
         Ok(())
     }
 }

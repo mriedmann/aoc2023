@@ -3,7 +3,9 @@ use std::collections::HashMap;
 use anyhow::Error;
 use crate::api::Solver;
 
-pub struct LevelSolver {}
+pub struct LevelSolver {
+    input: String,
+}
 
 struct Grid {
     data: Vec<char>,
@@ -96,17 +98,23 @@ fn get_part_numbers(input: &str) -> Vec<(usize, usize, char)> {
 }
 
 impl Solver for LevelSolver {
-    fn solve_a(input: &str) -> Result<u32,Error>  {
-        let part_numbers = get_part_numbers(input);
+    fn new(input: String) -> Self {
+        LevelSolver {
+            input: input.to_string()
+        }
+    }
+
+    fn solve_a(&self) -> Result<String,Error>  {
+        let part_numbers = get_part_numbers(&self.input);
         for part_number in part_numbers.clone() {
             //println!("{:?} {:?} {:?}", part_number.0, part_number.1, part_number.2);
             println!("{:?}", part_number.0);
         }
-        Ok(part_numbers.iter().map(|x| x.0 as u32).sum())
+        Ok(part_numbers.iter().map(|x| x.0 as u32).sum::<u32>().to_string())
     }
 
-    fn solve_b(input: &str) -> Result<u32,Error>  {
-        let part_numbers = get_part_numbers(input);
+    fn solve_b(&self) -> Result<String,Error>  {
+        let part_numbers = get_part_numbers(&self.input);
 
         let mut gears: HashMap<usize, Vec<&(usize,usize,char)>> = HashMap::new();
 
@@ -124,7 +132,8 @@ impl Solver for LevelSolver {
             .values()
             .filter(|x| x.len() > 1)
             .map(|x| x[0].0 as u32 * x[1].0 as u32)
-            .sum())
+            .sum::<u32>()
+            .to_string())
     }
 }
 
@@ -133,7 +142,7 @@ mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
-    fn input() -> &'static str {
+    fn input() -> String {
         "
 467..114..
 ...*......
@@ -145,24 +154,24 @@ mod tests {
 ......755.
 ...$.*....
 .664.598..
-        ".trim()
+        ".trim().to_string()
     }
 
     #[test]
     fn test_a() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_a(input)?;
+        let solution = LevelSolver::new(input).solve_a()?;
 
-        assert_eq!(solution, 4361);
+        assert_eq!(solution, 4361.to_string());
         Ok(())
     }
 
     #[test]
     fn test_b() -> Result<(),Error> {
         let input = input();
-        let solution = LevelSolver::solve_b(input)?;
+        let solution = LevelSolver::new(input).solve_b()?;
 
-        assert_eq!(solution, 467835);
+        assert_eq!(solution, 467835.to_string());
         Ok(())
     }
 }

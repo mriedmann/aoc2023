@@ -9,7 +9,7 @@ impl TextInputFile {
     pub fn new(level: u8) -> TextInputFile {
         let filename = format!("{:0>2}.in.txt", level);
         TextInputFile {
-            filename: filename,
+            filename,
         }
     }
 
@@ -18,7 +18,10 @@ impl TextInputFile {
     }
 }
 
-pub trait Solver<A = u32> {
-    fn solve_a(input: &str) -> Result<A, Error>;
-    fn solve_b(input: &str) -> Result<A, Error>;
+trait Solution : Sized { }
+
+pub trait Solver {
+    fn new(input: String) -> Self;
+    fn solve_a(&self) -> Result<String, Error>;
+    fn solve_b(&self) -> Result<String, Error>;
 }
